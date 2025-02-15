@@ -6,6 +6,7 @@ API v2
 
 import requests
 import pandas as pd
+from datetime import datetime
 
 # -------------------------------------CONFIG-----------------------------------
 
@@ -102,7 +103,64 @@ def get_current_data(station_name,
         return None
 
 
-def _filter_cols(df_data):
+def _datetime_str_to_unix(datetime_str):
+    '''
+    Return a UNIX timestamp in seconds
+    as an integer. Date must be in format
+    YYYY-MM-DD
+    '''
+
+    date_format = datetime.strptime(datetime_str,
+                                         "%Y-%m-%d")
+    unix_time = datetime.timestamp(date_format)
+
+    return int(unix_time)
+
+
+def get_historic_data(station_name,
+                     start_datetime,
+                     end_datetime, 
+                     df_stn_ids,
+                     api_key,
+                     api_secret):
+    '''
+    Get current conditions for the selected station
+    ID
+    '''
+    station_id = df_stn_ids[df_stn_ids["station_name"] == station_name]["station_id"].values.flatten()[0]
+    endpoint = "historic"
+    start_datetime_unix = _datetime_str_to_unix(start_datetime)
+    end_datetime_unix = _datetime_str_to_unix(end_datetime)
+
+    headers = {"X-Api-Secret": api_secret}
+    url = f"{URL_BASE}/{endpoint}/{station_id}?api-key={api_key}&start-timestamp={start_datetime_unix}&end-timestamp={end_datetime_unix}"
+
+    try:
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            print("Successful request")
+            json_response = response.json()
+            df_sensors = pd.DataFrame(json_response["sensors"])
+
+            df_data = pd.DataFrame()
+            for data in df_sensors["data"]:
+                df_sensor = pd.DataFrame(data)
+                df_data = pd.concat([df_data, df_sensor], axis = 1)
+
+            # df_data = df_data[cols]
+            print(f"Retrieved current data from {station_name}")
+            return df_data
+        else:
+            print(response.status_code)
+            print(response.reason)
+            return None
+        
+    except Exception:
+        print("Could not retrieve information")
+        return None
+
+
+def _filter_cols_current_data(df_data):
     df_data = df_data.loc[:,~df_data.columns.duplicated(keep = "last")].copy()
     df_data = df_data[cols]
 
@@ -129,8 +187,8 @@ def _mph_to_kmh(speed_mph):
     return speed_mph * 1.60934
 
 
-def parse_data(df_data):
-    df_data = _filter_cols(df_data)
+def parse_current_data(df_data):
+    df_data = _filter_cols_current_data(df_data)
     df_data = _unix_to_datetime(df_data)
 
     # convert pressure from inches to hPa
@@ -166,5 +224,5 @@ def download_current_data(station_name):
         print("No data to parse!")
         return None
     else:    
-        data_parsed = parse_data(df_data) 
+        data_parsed = parse_current_data(df_data) 
         return data_parsed
