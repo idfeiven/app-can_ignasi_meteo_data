@@ -4,10 +4,10 @@ import streamlit as st
 sys.path.append(os.path.join(os.path.dirname(__file__), "modules"))
 
 
-homepage = st.Page("modules/homepage.py", title = "Inicio")
+homepage = st.Page("modules/homepage.py", title = "Sencelles (Ca'n Ignasi) - Inicio")
 current_conditions_page = st.Page("modules/current_conditions_page.py", title = "Condiciones actuales")
 daily_summary_page = st.Page("modules/daily_summary_page.py", title = "Resumen diario")
-# recent_data_page = st.Page("modules/recent_data_page.py", title = "Recent data")
+plots_page = st.Page("modules/plots_page.py", title = "Gráficas")
 # historical_data_page = st.Page("modules/historical_data_page.py", title = "Historical data")
 # annual_comparison_page = st.Page("modules/annual_comparison_page.py", title = "Annual comparison page")
 # statistics_page = st.Page("modules/statistics_page.py", title = "Statistics")
@@ -17,7 +17,8 @@ daily_summary_page = st.Page("modules/daily_summary_page.py", title = "Resumen d
 
 pg = st.navigation([homepage,
                     current_conditions_page,
-                    daily_summary_page
+                    daily_summary_page,
+                    plots_page
                     ]
                   )
 

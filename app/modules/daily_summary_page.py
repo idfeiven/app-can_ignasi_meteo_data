@@ -1,13 +1,7 @@
 import os
 import sys
-import time
-import matplotlib
-import numpy as np
 import pandas as pd
 import streamlit as st
-import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
-
 from common import get_range_vals_for_color_norm,\
                    get_cmap,\
                    box_data
