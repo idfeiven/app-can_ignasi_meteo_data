@@ -8,6 +8,8 @@ import requests
 import pandas as pd
 from datetime import datetime
 
+# todo fix bug in historic data, no precipitation found when query
+
 # -------------------------------------CONFIG-----------------------------------
 
 URL_BASE = "https://api.weatherlink.com/v2"
@@ -188,6 +190,10 @@ def _filter_cols_current_data(df_data):
 def _filter_cols_historic_data(df_data):
     df_nowind_data = df_data.loc[:,~df_data.columns.duplicated(keep = "last")].copy()
     df_wind_data = df_data.loc[:,~df_data.columns.duplicated(keep = "first")].copy()
+    # precipitation in df_wind_data comes from sensor ID #2 which has no
+    # rain gauge, delete columns for rain in df_wind_data
+    df_wind_data = df_wind_data.drop(columns = [col for col in df_wind_data.columns if "rain" in col])
+    
     df_data = pd.concat([df_wind_data, df_nowind_data], axis = 1)
     df_data = df_data.dropna(axis = 1, how = "all")
     df_data = df_data.loc[:,~df_data.columns.duplicated(keep = "first")].copy()

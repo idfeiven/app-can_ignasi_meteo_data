@@ -153,7 +153,7 @@ def get_df_month_summary(data_month):
                                 data_month_min,
                                 data_month_mean,
                                 data_month_prec], axis = 1)
-    df_month_summary = df_month_summary.iloc[1:].round(1)
+    df_month_summary = df_month_summary.round(1)
 
     cols_order = ['Temperatura máxima (°C)', 'Temperatura mínima (°C)', 'Temperatura media (°C)',
                 'Velocidad del viento media (km/h)', 'Dirección media del viento (°)',
