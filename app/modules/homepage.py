@@ -17,7 +17,7 @@ st.write("Modelo Davis Vantage Pro2")
 
 st.markdown("## Localización estación")
 map_data = get_map_data()
-st.map(map_data)
+st.map(map_data, size = 1000, zoom = 9)
 
 st.markdown("## Descripción")
 st.write("Esta estación meteorológica se encuentra en las tierras del interior\n\
