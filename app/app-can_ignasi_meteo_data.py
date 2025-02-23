@@ -8,7 +8,7 @@ homepage = st.Page("modules/homepage.py", title = "Sencelles (Ca'n Ignasi) - Ini
 current_conditions_page = st.Page("modules/current_conditions_page.py", title = "Condiciones actuales")
 daily_summary_page = st.Page("modules/daily_summary_page.py", title = "Resumen diario")
 plots_page = st.Page("modules/plots_page.py", title = "Gráficas")
-# historical_data_page = st.Page("modules/historical_data_page.py", title = "Historical data")
+monthly_summary_page = st.Page("modules/monthly_summary_page.py", title = "Resumen mensual")
 # annual_comparison_page = st.Page("modules/annual_comparison_page.py", title = "Annual comparison page")
 # statistics_page = st.Page("modules/statistics_page.py", title = "Statistics")
 # extreme_data_page = st.Page("modules/extreme_data_page.py", title = "Data extremes")
@@ -18,7 +18,8 @@ plots_page = st.Page("modules/plots_page.py", title = "Gráficas")
 pg = st.navigation([homepage,
                     current_conditions_page,
                     daily_summary_page,
-                    plots_page
+                    plots_page,
+                    monthly_summary_page
                     ]
                   )
 

@@ -30,7 +30,7 @@ def current_conditions(data_current):
     # Obtener colores según la paleta continua
     range_vals = get_range_vals_for_color_norm()
 
-    color_temp = get_cmap(temperature, range_vals["temp"][0], range_vals["temp"][1], "jet")
+    color_temp = get_cmap(temperature, range_vals["temp"][0], range_vals["temp"][1], "gist_rainbow_r")
     color_hum = get_cmap(humidity, range_vals["hum"][0], range_vals["hum"][1], "BuPu")
     color_wind = get_cmap(wind_speed, range_vals["wind"][0], range_vals["wind"][1], "gist_ncar")
     color_pres = get_cmap(pressure, range_vals["pres"][0], range_vals["pres"][1], "PuRd")
@@ -78,7 +78,10 @@ def temperature_conditions(data_current):
 
     # Obtener colores según la paleta continua
     range_vals = get_range_vals_for_color_norm()
-    color_temp = get_cmap(temperature, range_vals["temp"][0], range_vals["temp"][1], "jet")
+    color_temp = get_cmap(temperature, range_vals["temp"][0], range_vals["temp"][1], "gist_rainbow_r")
+    color_dp = get_cmap(dewpoint, range_vals["temp"][0], range_vals["temp"][1], "gist_rainbow_r")
+    color_hi = get_cmap(heat_index, range_vals["temp"][0], range_vals["temp"][1], "gist_rainbow_r")
+    color_wc = get_cmap(wind_chill, range_vals["temp"][0], range_vals["temp"][1], "gist_rainbow_r")
 
     # Mostrar los datos en cuadros grandes con colores de fondo
     col1, col2, col3, col4 = st.columns(4)
@@ -89,15 +92,15 @@ def temperature_conditions(data_current):
 
     with col2:
         st.markdown("##### Punto de rocío")
-        box_dp = box_data(dewpoint, color_temp, unit = "°C")
+        box_dp = box_data(dewpoint, color_dp, unit = "°C")
 
     with col3:
         st.markdown("##### Sensación calor")
-        box_hi = box_data(heat_index, color_temp, unit = "°C")
+        box_hi = box_data(heat_index, color_hi, unit = "°C")
 
     with col4:
         st.markdown("##### Sensación frío")
-        box_wc = box_data(wind_chill, color_temp, unit = "°C")
+        box_wc = box_data(wind_chill, color_wc, unit = "°C")
 
 
 def rain_conditions(data_current):
@@ -259,16 +262,6 @@ def wind_conditions(data_current):
     with col10:
         st.markdown("##### Dirección racha últimos 10 min.")
         box_wind_dir = box_data(wind_dir_gust_10min, color = None, unit = "°", box_arrow=True)
-
-
-def get_today_max_data(data_current):
-
-    cols_max = ['bar_hi', 'heat_index_hi', 'temp_hi', 'hum_hi', 'wind_speed_hi']
-    daily_max_vals = pd.DataFrame(data_current[cols_max].max(), columns = ["variable"])
-    idx_max = data_current[cols_max].idxmax()
-    daily_max_vals["time"] = data_current.loc[idx_max, [col + "_at" for col in cols_max]].values.diagonal()
-    
-    return daily_max_vals
 
 
 # ---------------------------------------MAIN PROGRAM------------------------------------------        

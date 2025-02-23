@@ -42,8 +42,8 @@ def temperature_summary(todays_max, todays_min):
 
     # Obtener colores según la paleta continua
     range_vals = get_range_vals_for_color_norm()
-    color_temp_max = get_cmap(temperature_max, range_vals["temp"][0], range_vals["temp"][1], "jet")
-    color_temp_min = get_cmap(temperature_min, range_vals["temp"][0], range_vals["temp"][1], "jet")
+    color_temp_max = get_cmap(temperature_max, range_vals["temp"][0], range_vals["temp"][1], "gist_rainbow_r")
+    color_temp_min = get_cmap(temperature_min, range_vals["temp"][0], range_vals["temp"][1], "gist_rainbow_r")
 
     # Mostrar los datos en cuadros grandes con colores de fondo
     col1, col2 = st.columns(2)
