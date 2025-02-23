@@ -25,12 +25,11 @@ cols = ['ts', 'bar_absolute', 'bar_sea_level', 'bar_trend',
        'rain_storm_last_mm', 'wind_speed_avg_last_1_min', 'rain_rate_last_mm', 'rain_rate_hi_last_15_min_mm']
 
 cols_hist = ['bar_absolute', 'bar_hi_at', 'bar_sea_level', 'bar_lo', 'bar_hi',
-       'bar_lo_at', 'wind_speed_avg', 'dew_point_hi_at', 'wind_chill_last',
-       'solar_rad_hi', 'dew_point_lo_at', 'dew_point_last',       
+       'bar_lo_at', 'wind_speed_avg', 'dew_point_hi_at', 'dew_point_lo_at', 'dew_point_last',       
        'heat_index_hi', 'rain_rate_hi_at', 'temp_hi', 'temp_lo',
-       'wind_dir_of_prevail', 'wind_chill_lo_at', 'rainfall_mm', 'hum_lo',
+       'wind_dir_of_prevail', 'rainfall_mm', 'hum_lo',
        'heat_index_last', 'hum_hi', 'heat_index_hi_at', 'rain_rate_hi_mm',
-       'wind_speed_hi', 'temp_last', 'temp_avg', 'hum_last', 'wind_chill_lo',
+       'wind_speed_hi', 'temp_last', 'temp_avg', 'hum_last', 
        'wind_speed_hi_at', 'wind_speed_hi_dir', 'temp_lo_at', 'dew_point_hi',
        'dew_point_lo', 'temp_hi_at', 'hum_lo_at', 'hum_hi_at', 'ts']
 
@@ -187,7 +186,11 @@ def _filter_cols_current_data(df_data):
 
 
 def _filter_cols_historic_data(df_data):
-    df_data = df_data.loc[:,~df_data.columns.duplicated(keep = "last")].copy()
+    df_nowind_data = df_data.loc[:,~df_data.columns.duplicated(keep = "last")].copy()
+    df_wind_data = df_data.loc[:,~df_data.columns.duplicated(keep = "first")].copy()
+    df_data = pd.concat([df_wind_data, df_nowind_data], axis = 1)
+    df_data = df_data.dropna(axis = 1, how = "all")
+    df_data = df_data.loc[:,~df_data.columns.duplicated(keep = "first")].copy()
     df_data = df_data[cols_hist]
 
     return df_data
@@ -245,9 +248,9 @@ def parse_historic_data(df_data):
     df_data[cols_pres] = df_data[cols_pres].apply(_in_to_hPa).round(1)
 
     # convert temperature fahrenheit to celsius
-    cols_temp = ['wind_chill_last', 'dew_point_last', 'heat_index_hi', 
+    cols_temp = ['dew_point_last', 'heat_index_hi', 
                  'temp_hi', 'temp_lo', 'heat_index_last', 'temp_last',
-                 'temp_avg', 'wind_chill_lo', 'dew_point_hi', 'dew_point_lo']
+                 'temp_avg', 'dew_point_hi', 'dew_point_lo']
     df_data[cols_temp] = df_data[cols_temp].apply(_fahrenheit_to_celsius).round(1)
 
     # convert wind speed data from mph to kmh

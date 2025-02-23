@@ -46,29 +46,26 @@ def get_month_dates(selected_month, selected_year):
     return num_days, date_month_min, date_month_max, dates 
 
 
-def get_df_data_month(dates, num_days):
+@st.cache_data # store data in cache
+def get_df_data_month(_dates, num_days):
+    # download 5min data for the selected month
     data_month = pd.DataFrame()
     count = 0
 
-    if data_month not in st.session_state:
+    for datetime in _dates:
+        count += 1
+        with st.spinner(f"🔄Descargando datos...Día {count}/{num_days}"):
 
-        with st.spinner(f"🔄Descargando datos..."):
+            start = datetime.strftime("%Y-%m-%d")
+            end = datetime + pd.Timedelta("1 day")
+            end = end.strftime("%Y-%m-%d")
 
-            for datetime in dates:
-                count += 1
-                start = datetime.strftime("%Y-%m-%d")
-                end = datetime + pd.Timedelta("1 day")
-                end = end.strftime("%Y-%m-%d")
-
-                data_day = download_data(station_name = "Sencelles (Ca'n Ignasi)",
-                                        start_datetime = start,
-                                        end_datetime = end,
-                                        historic = True)
-                
-                data_month = pd.concat([data_month, data_day], axis = 0)
-                st.session_state.data_month = data_month
-
-        st.success("✅Datos descargados")
+            data_day = download_data(station_name = "Sencelles (Ca'n Ignasi)",
+                                    start_datetime = start,
+                                    end_datetime = end,
+                                    historic = True)
+            
+            data_month = pd.concat([data_month, data_day], axis = 0)
 
     return data_month
 
@@ -85,13 +82,14 @@ def get_value_ranges():
         "Humedad (%)": (0, 100),
         "Presión al nivel del mar (hPa)": (980, 1045),
         "Precipitación (mm)": (0, 100),
+        "Precipitación acumulada (mm)": (0, 250),
         "Intensidad máxima de precipitación (mm/h)": (0, 1440)
     }
 
     return ranges 
 
 
-def get_cmaps():
+def get_cmaps_for_data_month():
 
     # Definir paletas de colores diferentes para cada columna
     colormap = {
@@ -104,6 +102,7 @@ def get_cmaps():
         "Humedad (%)": "BuPu",   
         "Presión al nivel del mar (hPa)": "PuRd",
         "Precipitación (mm)": "cool",
+        "Precipitación acumulada (mm)": "cool",
         "Intensidad máxima de precipitación (mm/h)": "cool",
                 }
     
@@ -126,6 +125,7 @@ def apply_colors(df, ranges, colormap):
     return df.style.apply(lambda col: col.map(lambda val: color_cell(val, col.name, ranges, colormap))).format("{:.1f}")
 
 
+@st.cache_data # store data in cache
 def get_df_month_summary(data_month):
 
     data_month.reset_index(inplace = True)
@@ -146,6 +146,8 @@ def get_df_month_summary(data_month):
 
     cols_prec = ['Precipitación (mm)']
     data_month_prec = data_month.set_index("ts").resample("D").sum()[cols_prec]
+    data_month_prec = data_month_prec.copy()
+    data_month_prec["Precipitación acumulada (mm)"] = data_month_prec[cols_prec].cumsum()
 
     df_month_summary = pd.concat([data_month_max,
                                 data_month_min,
@@ -156,7 +158,7 @@ def get_df_month_summary(data_month):
     cols_order = ['Temperatura máxima (°C)', 'Temperatura mínima (°C)', 'Temperatura media (°C)',
                 'Velocidad del viento media (km/h)', 'Dirección media del viento (°)',
                 'Racha de viento máxima (km/h)', 'Humedad (%)', 'Presión al nivel del mar (hPa)',
-                'Precipitación (mm)', 'Intensidad máxima de precipitación (mm/h)']
+                'Precipitación (mm)', 'Precipitación acumulada (mm)','Intensidad máxima de precipitación (mm/h)']
     df_month_summary = df_month_summary[cols_order]
     df_month_summary.index.rename("Fecha", inplace = True)
     df_month_summary.index = df_month_summary.index.strftime("%Y-%m-%d")
@@ -173,26 +175,24 @@ st.title("Resumen mensual")
 
 # Selector de año (últimos 10 años)
 years = list(range(year_actual - 3, year_actual + 1 ))
-selected_year = st.selectbox("Selecciona un año:", options=years, index=years.index(year_actual))
-selected_month = st.selectbox("Selecciona un mes:", options=list(months.keys()), format_func=lambda x: months[x], index=month_actual - 1)
+selected_year = st.selectbox("Selecciona un año:",
+                             options=years,
+                             index=years.index(year_actual))
+selected_month = st.selectbox("Selecciona un mes:",
+                              options=list(months.keys()),
+                              format_func=lambda x: months[x],
+                              index=month_actual - 1)
 
 num_days, date_month_min, date_month_max, dates = get_month_dates(selected_month, selected_year)
-data_month = get_df_data_month(dates, num_days)
 
+data_month = get_df_data_month(dates, num_days)
 df_month_summary = get_df_month_summary(data_month)
 
 ranges = get_value_ranges()
-colormap = get_cmaps()
+colormap = get_cmaps_for_data_month()
 st.dataframe(apply_colors(df_month_summary, ranges, colormap))
 
-
 st.markdown("## Gráficas")
-
-if df_month_summary not in st.session_state:
-   st.session_state.df_month_summary = df_month_summary
-
-df_month_summary = st.session_state.df_month_summary
-
 # Selector de variable a graficar
 variable = st.selectbox(
     "Selecciona una variable para representar:", 

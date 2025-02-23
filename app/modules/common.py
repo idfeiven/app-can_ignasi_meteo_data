@@ -14,8 +14,6 @@ def parse_cols_historical_data(data):
                                 'bar_lo': 'Presión mínima al nivel del mar (hPa)',
                                 'bar_hi': 'Presión máxima al nivel del mar (hPa)',
                                 'wind_speed_avg': 'Velocidad del viento media (km/h)',
-                                'wind_chill_last': 'Sensación de frío (°C)',
-                                'solar_rad_hi': 'Radiación solar máxima (W/m2)',
                                 'dew_point_last': 'Punto de rocío (°C)',
                                 'temp_hi': 'Temperatura máxima (°C)',
                                 'temp_lo': 'Temperatura mínima (°C)',
@@ -30,7 +28,6 @@ def parse_cols_historical_data(data):
                                 'temp_last': 'Temperatura (°C)',
                                 'temp_avg': 'Temperatura media (°C)',
                                 'hum_last': 'Humedad (%)',
-                                'wind_chill_lo': 'Sensación de frío mínima (°C)',
                                 'wind_speed_hi_dir': 'Dirección racha de viento máxima (°)',
                                 'dew_point_hi': 'Punto de rocío máximo (°C)',
                                 'dew_point_lo': 'Punto de rocío mínimo (°C)'
