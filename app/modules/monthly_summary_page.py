@@ -12,6 +12,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'data'))
 from download_pws_data_weatherlink import download_data
 
 
+# Borrar la caché al iniciar la app para obtener siempre datos nuevos
+st.cache_data.clear()
+
 # -------------------------------------FUNCTIONS-----------------------------------
 
 def get_current_year_month():
