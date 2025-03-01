@@ -5,7 +5,6 @@ import matplotlib
 import pandas as pd
 import streamlit as st
 from datetime import date
-import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from common import parse_cols_historical_data, plot_interactive
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'data')))
@@ -45,6 +44,9 @@ def get_month_dates(selected_month, selected_year):
     date_month_max = date(selected_year, selected_month, num_days)
 
     dates = pd.date_range(date_month_min, date_month_max, freq = "D")
+
+    if pd.to_datetime("today") < dates[-1]:
+        dates = pd.date_range(date_month_min, pd.to_datetime("today"), freq = "D")
 
     return num_days, date_month_min, date_month_max, dates 
 
@@ -131,6 +133,7 @@ def apply_colors(df, ranges, colormap):
 @st.cache_data # store data in cache
 def get_df_month_summary(data_month):
     
+    data_month = data_month.copy()
     data_month.loc[data_month.index[-1], 'ts'] -= pd.Timedelta("1 s")
     data_month = data_month.set_index("ts").tz_localize("UTC").tz_convert("Europe/Madrid").tz_localize(None)
 
