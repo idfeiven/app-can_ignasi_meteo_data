@@ -188,11 +188,29 @@ selected_month = st.selectbox("Selecciona un mes:",
 
 num_days, date_month_min, date_month_max, dates = get_month_dates(selected_month, selected_year)
 
-data_month = get_df_data_month(dates, num_days)
-df_month_summary = get_df_month_summary(data_month)
+# data_month = get_df_data_month(dates, num_days)
+# df_month_summary = get_df_month_summary(data_month)
+
+# Verificar si el dataframe ya está en session_state y si el año/mes cambió
+if "data_month" not in st.session_state or \
+   st.session_state.get("selected_year") != selected_year or \
+   st.session_state.get("selected_month") != selected_month:
+
+    # Si cambia el mes o año, actualizar datos y guardar en session_state
+    st.session_state["selected_year"] = selected_year
+    st.session_state["selected_month"] = selected_month
+    st.session_state["data_month"] = get_df_data_month(dates, num_days)
+    st.session_state["df_month_summary"] = get_df_month_summary(st.session_state["data_month"])
+
+    # Usar los datos almacenados en session_state sin volver a descargarlos
+    df_month_summary = st.session_state["df_month_summary"]
+
+# Usar los datos almacenados en session_state
+df_month_summary = st.session_state.df_month_summary
 
 ranges = get_value_ranges()
 colormap = get_cmaps_for_data_month()
+
 st.dataframe(apply_colors(df_month_summary, ranges, colormap))
 
 st.markdown("## Gráficas")
