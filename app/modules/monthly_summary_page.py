@@ -130,25 +130,28 @@ def apply_colors(df, ranges, colormap):
 
 @st.cache_data # store data in cache
 def get_df_month_summary(data_month):
+    
+    data_month.loc[data_month.index[-1], 'ts'] -= pd.Timedelta("1 s")
+    data_month = data_month.set_index("ts").tz_localize("UTC").tz_convert("Europe/Madrid").tz_localize(None)
 
-    data_month.reset_index(inplace = True)
-    data_month.drop('index', axis = 1, inplace=True)
+    # data_month.reset_index(inplace = True)
+    # data_month.drop('index', axis = 1, inplace=True)
     data_month = data_month[[col for col in data_month.columns if "_at" not in col]]
     data_month = parse_cols_historical_data(data_month)
 
     cols_max = ['Temperatura máxima (°C)', 'Intensidad máxima de precipitación (mm/h)',
                 'Racha de viento máxima (km/h)']
-    data_month_max = data_month.set_index("ts").resample("D").max()[cols_max]
+    data_month_max = data_month.resample("D").max()[cols_max]
 
     cols_min = ['Temperatura mínima (°C)']
-    data_month_min = data_month.set_index("ts").resample("D").min()[cols_min]
+    data_month_min = data_month.resample("D").min()[cols_min]
 
     cols_mean = ['Presión al nivel del mar (hPa)', 'Velocidad del viento media (km/h)',
                 'Temperatura media (°C)', 'Humedad (%)', 'Dirección media del viento (°)']
-    data_month_mean = data_month.set_index("ts").resample("D").mean()[cols_mean]
+    data_month_mean = data_month.resample("D").mean()[cols_mean]
 
     cols_prec = ['Precipitación (mm)']
-    data_month_prec = data_month.set_index("ts").resample("D").sum()[cols_prec]
+    data_month_prec = data_month.resample("D").sum()[cols_prec]
     data_month_prec = data_month_prec.copy()
     data_month_prec["Precipitación acumulada (mm)"] = data_month_prec[cols_prec].cumsum()
 
@@ -187,9 +190,6 @@ selected_month = st.selectbox("Selecciona un mes:",
                               index=month_actual - 1)
 
 num_days, date_month_min, date_month_max, dates = get_month_dates(selected_month, selected_year)
-
-# data_month = get_df_data_month(dates, num_days)
-# df_month_summary = get_df_month_summary(data_month)
 
 # Verificar si el dataframe ya está en session_state y si el año/mes cambió
 if "data_month" not in st.session_state or \
