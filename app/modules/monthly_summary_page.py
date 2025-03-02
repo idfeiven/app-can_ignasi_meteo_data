@@ -51,7 +51,6 @@ def get_month_dates(selected_month, selected_year):
     return num_days, date_month_min, date_month_max, dates 
 
 
-@st.cache_data # store data in cache
 def get_df_data_month(_dates, num_days):
     # download 5min data for the selected month
     data_month = pd.DataFrame()
@@ -130,7 +129,6 @@ def apply_colors(df, ranges, colormap):
     return df.style.apply(lambda col: col.map(lambda val: color_cell(val, col.name, ranges, colormap))).format("{:.1f}")
 
 
-@st.cache_data # store data in cache
 def get_df_month_summary(data_month):
     
     data_month = data_month.copy()
