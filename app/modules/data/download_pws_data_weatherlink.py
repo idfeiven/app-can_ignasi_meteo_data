@@ -197,7 +197,12 @@ def _filter_cols_historic_data(df_data):
     df_data = pd.concat([df_wind_data, df_nowind_data], axis = 1)
     df_data = df_data.dropna(axis = 1, how = "all")
     df_data = df_data.loc[:,~df_data.columns.duplicated(keep = "first")].copy()
-    df_data = df_data[cols_hist]
+
+    if df_data.columns.str.contains("wind").any():
+        df_data = df_data[cols_hist]
+    else:
+        cols_hist_f = [col for col in cols_hist if "wind" not in col]
+        df_data = df_data[cols_hist_f]
 
     return df_data
 
@@ -260,8 +265,9 @@ def parse_historic_data(df_data):
     df_data[cols_temp] = df_data[cols_temp].apply(_fahrenheit_to_celsius).round(1)
 
     # convert wind speed data from mph to kmh
-    cols_wind = ['wind_speed_avg', 'wind_speed_hi']
-    df_data[cols_wind] = df_data[cols_wind].apply(_mph_to_kmh).round(1)
+    if ("wind_speed_avg" and "wind_speed_hi") in df_data:
+        cols_wind = ['wind_speed_avg', 'wind_speed_hi']
+        df_data[cols_wind] = df_data[cols_wind].apply(_mph_to_kmh).round(1)
 
     return df_data
 
