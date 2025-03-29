@@ -133,7 +133,7 @@ def get_df_month_summary(data_month):
     
     data_month = data_month.copy()
     data_month.loc[data_month.index[-1], 'ts'] -= pd.Timedelta("1 s")
-    data_month = data_month.set_index("ts").tz_localize("UTC").tz_convert("Europe/Madrid").tz_localize(None)
+    data_month = data_month.set_index("ts").tz_localize("UTC").tz_convert("Europe/Madrid")#.tz_localize(None)
 
     # data_month.reset_index(inplace = True)
     # data_month.drop('index', axis = 1, inplace=True)
