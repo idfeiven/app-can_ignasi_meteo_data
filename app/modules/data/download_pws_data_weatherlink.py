@@ -8,8 +8,6 @@ import requests
 import pandas as pd
 from datetime import datetime
 
-# todo fix bug in historic data, no precipitation found when query
-
 # -------------------------------------CONFIG-----------------------------------
 
 URL_BASE = "https://api.weatherlink.com/v2"
