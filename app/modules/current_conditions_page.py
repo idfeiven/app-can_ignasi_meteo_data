@@ -156,7 +156,7 @@ def rain_conditions(data_current):
 
     with col7:
         st.markdown("##### Lluvia este año")
-        color = get_cmap(rain_month, 0.0, 600.0, "cool")
+        color = get_cmap(rain_year, 0.0, 600.0, "cool")
         box_rain_year = box_data(rain_year, color, unit = "mm")
 
 

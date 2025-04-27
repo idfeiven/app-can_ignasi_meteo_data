@@ -200,21 +200,17 @@ if "data_month" not in st.session_state or \
     # Si cambia el mes o año, actualizar datos y guardar en session_state
     st.session_state["selected_year"] = selected_year
     st.session_state["selected_month"] = selected_month
-    # st.session_state["data_month"] = get_df_data_month(dates, num_days)
-    # st.session_state["df_month_summary"] = get_df_month_summary(st.session_state["data_month"])
+    st.session_state["data_month"] = get_df_data_month(dates, num_days)
+    st.session_state["df_month_summary"] = get_df_month_summary(st.session_state["data_month"])
 
     # Usar los datos almacenados en session_state sin volver a descargarlos
-    # df_month_summary = st.session_state["df_month_summary"]
+    df_month_summary = st.session_state["df_month_summary"]
 
 # Usar los datos almacenados en session_state
-# df_month_summary = st.session_state.df_month_summary
+df_month_summary = st.session_state.df_month_summary
 
 ranges = get_value_ranges()
 colormap = get_cmaps_for_data_month()
-
-data_month = get_df_data_month(dates, num_days)
-df_month_summary = get_df_month_summary(data_month)
-
 st.dataframe(apply_colors(df_month_summary, ranges, colormap))
 
 st.markdown("## Gráficas")
