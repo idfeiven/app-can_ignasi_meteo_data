@@ -115,9 +115,9 @@ def get_current_data(station_name,
     router_ip = _check_router_ip()
     if router_ip == '192.168.1.1':
         wll_ip = '192.168.1.101'
-        URL_BASE = f"http://{wll_ip}/v1"
+        URL_BASE_LOCAL = f"http://{wll_ip}/v1"
         endpoint = "current_conditions"
-        url = f"{URL_BASE}/{endpoint}"
+        url = f"{URL_BASE_LOCAL}/{endpoint}"
         headers = None
 
         try:
