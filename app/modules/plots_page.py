@@ -10,6 +10,13 @@ from download_pws_data_weatherlink import download_data
 
 # -----------------------------------MAIN PROGRAM-------------------------------------------
 
+st.set_page_config(
+    page_title="Gráficas",
+    page_icon=":bar_chart:",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
 st.title("Gráficas")
 
 # Selector de fecha

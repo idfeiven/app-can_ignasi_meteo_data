@@ -1,5 +1,6 @@
 import matplotlib
 import streamlit as st
+import math
 import plotly.express as px
 import matplotlib.colors as mcolors
 
@@ -84,6 +85,10 @@ def get_range_vals_for_color_norm():
 
 
 def get_cmap(valor, min_val, max_val, cmap_name="coolwarm"):
+    # Si el valor no es numérico (None o nan), devuelve gris
+    if valor is None or (isinstance(valor, float) and math.isnan(valor)):
+        return "#bdbdbd"  # Gris claro por defecto
+
     norm = mcolors.Normalize(vmin=min_val, vmax=max_val)
     cmap = matplotlib.colormaps.get_cmap(cmap_name)
     color_rgb = cmap(norm(valor))[:3]  # Obtiene el color en formato RGB

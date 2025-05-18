@@ -9,7 +9,7 @@ from common import get_range_vals_for_color_norm,\
                    box_data
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'data')))
-from download_pws_data_weatherlink import download_data
+from download_pws_data_weatherlink import download_data, _check_router_ip
 
 
 # ---------------------------------FUNCTIONS---------------------------------------
@@ -234,6 +234,7 @@ def wind_conditions(data_current):
 
     with col4:
         st.markdown("##### Racha últimos 2 min.")
+        color = get_cmap(wind_gust_2min, 0.0, 60.0, "gist_ncar")
         box_wind = box_data(wind_gust_2min, color_wind, unit = "km/h")
 
     with col5:
@@ -253,6 +254,7 @@ def wind_conditions(data_current):
 
     with col8:
         st.markdown("##### Racha últimos 10 min.")
+        color = get_cmap(wind_gust_10min, 0.0, 50.0, "gist_ncar")
         box_wind = box_data(wind_gust_10min, color_wind, unit = "km/h")
 
     with col9:
@@ -265,13 +267,21 @@ def wind_conditions(data_current):
 
 
 # ---------------------------------------MAIN PROGRAM------------------------------------------        
+st.set_page_config(page_title="Condiciones actuales", page_icon=":sunny:", layout="wide")
 
+router_ip = _check_router_ip()
+if router_ip == '192.168.1.1':
+    sleep_time = 2.5
+else:
+    sleep_time = 60
+
+placeholder = st.empty()
 while True:
     data_current = download_data(station_name = "Sencelles (Ca'n Ignasi)",
                                  start_datetime = None,
                                  end_datetime = None,
                                  historic = False)
-    placeholder = st.empty()
+
     
     with placeholder.container():
 
@@ -283,5 +293,4 @@ while True:
 
         st.write(f"Página actualizada a {pd.to_datetime("now").strftime("%d-%m-%Y %H:%M")}")
     
-    time.sleep(60)
-    placeholder.empty()    
+    time.sleep(sleep_time)

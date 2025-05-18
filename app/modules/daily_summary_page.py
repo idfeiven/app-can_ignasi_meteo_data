@@ -9,7 +9,7 @@ from common import get_range_vals_for_color_norm,\
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'data')))
 from download_pws_data_weatherlink import download_data
 
-
+# ------------------------------------FUNCTIONS------------------------------------
 
 def get_today_max_data(data_current):
 
@@ -165,6 +165,13 @@ def wind_summary(todays_max):
         box_time = box_data(datetime_wind_max, color = None, unit = "")
 
 
+# ------------------------------------MAIN------------------------------------
+
+st.set_page_config(
+    page_title="Resumen diario",
+    page_icon=":bar_chart:",
+    layout="wide",
+)
 
 today = pd.to_datetime("today").date().strftime("%Y-%m-%d")
 tomorrow = pd.to_datetime("today").date() + pd.Timedelta("1 day")

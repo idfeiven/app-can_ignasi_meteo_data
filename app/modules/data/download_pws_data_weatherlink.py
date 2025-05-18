@@ -7,6 +7,9 @@ API v2
 import requests
 import pandas as pd
 from datetime import datetime
+import platform
+import re
+import subprocess
 
 # -------------------------------------CONFIG-----------------------------------
 
@@ -14,14 +17,14 @@ URL_BASE = "https://api.weatherlink.com/v2"
 
 cols = ['ts', 'bar_absolute', 'bar_sea_level', 'bar_trend',
        'wind_speed_hi_last_2_min', 'hum', 'wind_dir_at_hi_speed_last_10_min', 'wind_chill',
-       'wind_dir_scalar_avg_last_10_min', 'rain_size', 'uv_index',
+       'wind_dir_scalar_avg_last_10_min', 'rain_size',
        'wind_speed_last', 'wet_bulb', 'wind_speed_avg_last_10_min',
        'wind_dir_at_hi_speed_last_2_min', 'wind_dir_last', 'rainfall_daily_mm', 'dew_point',
        'rainfall_last_15_min_mm', 'rain_rate_hi_mm', 'rain_storm_last_end_at', 'rain_storm_mm',
        'wind_dir_scalar_avg_last_2_min', 'heat_index', 'rainfall_last_60_min_mm',
        'rain_storm_start_time', 'rainfall_last_24_hr_mm', 'wind_speed_hi_last_10_min',
        'rainfall_year_mm', 'wind_dir_scalar_avg_last_1_min', 'temp',
-       'wind_speed_avg_last_2_min', 'solar_rad', 'rainfall_monthly_mm',
+       'wind_speed_avg_last_2_min', 'rainfall_monthly_mm',
        'rain_storm_last_mm', 'wind_speed_avg_last_1_min', 'rain_rate_last_mm', 'rain_rate_hi_last_15_min_mm']
 
 cols_hist = ['bar_absolute', 'bar_hi_at', 'bar_sea_level', 'bar_lo', 'bar_hi',
@@ -74,6 +77,31 @@ def get_station_ids(api_key, api_secret):
         return None
 
 
+def _check_router_ip():
+    """
+    Returns the IP address of the router (default gateway) the device is connected to.
+    """
+
+    system = platform.system()
+    try:
+        if system == "Windows":
+            output = subprocess.check_output("ipconfig", encoding="latin-1")
+            match = re.search(r"Puerta de enlace predeterminada[ .]*: ([\d\.]+)", output)
+            if not match:
+                # English fallback
+                match = re.search(r"Default Gateway[ .]*: ([\d\.]+)", output)
+            if match:
+                return match.group(1)
+        else:
+            output = subprocess.check_output("ip route", shell=True, encoding="latin-1")
+            match = re.search(r"default via ([\d\.]+)", output)
+            if match:
+                return match.group(1)
+    except Exception:
+        pass
+    return None
+
+
 def get_current_data(station_name,
                      df_stn_ids,
                      api_key,
@@ -83,33 +111,69 @@ def get_current_data(station_name,
     ID
     '''
     station_id = df_stn_ids[df_stn_ids["station_name"] == station_name]["station_id"].values.flatten()[0]
-    endpoint = "current"
-    headers = {"X-Api-Secret": api_secret}
-    url = f"{URL_BASE}/{endpoint}/{station_id}?api-key={api_key}"
 
-    try:
-        response = requests.get(url, headers=headers)
-        if response.status_code == 200:
-            print("Successful request")
-            json_response = response.json()
-            df_sensors = pd.DataFrame(json_response["sensors"])
+    router_ip = _check_router_ip()
+    if router_ip == '192.168.1.1':
+        wll_ip = '192.168.1.101'
+        URL_BASE = f"http://{wll_ip}/v1"
+        endpoint = "current_conditions"
+        url = f"{URL_BASE}/{endpoint}"
+        headers = None
 
-            df_data = pd.DataFrame()
-            for data in df_sensors["data"]:
-                df_sensor = pd.DataFrame(data)
-                df_data = pd.concat([df_data, df_sensor], axis = 1)
+        try:
+            response = requests.get(url, headers=headers)
+            if response.status_code == 200:
+                print("Successful request")
+                json_response = response.json()
+                df_sensors = pd.DataFrame(json_response["data"])
 
-            # df_data = df_data[cols]
-            print(f"Retrieved current data from {station_name}")
-            return df_data
-        else:
-            print(response.status_code)
-            print(response.reason)
+                df_data = pd.DataFrame()
+                for data in df_sensors["conditions"]:
+                    df_sensor = pd.DataFrame([data])
+                    df_sensor = df_sensor.dropna(axis = 1, how = "all")
+                    df_sensor["ts"] = df_sensors["ts"].unique()[0]
+                    df_data = pd.concat([df_data, df_sensor], axis = 1)
+
+                # df_data = df_data[cols]
+                print(f"Retrieved current data from {station_name}")
+                return df_data
+            else:
+                print(response.status_code)
+                print(response.reason)
+                return None
+            
+        except Exception:
+            print("Could not retrieve information")
             return None
-        
-    except Exception:
-        print("Could not retrieve information")
-        return None
+
+    else:
+        endpoint = "current"
+        headers = {"X-Api-Secret": api_secret}
+        url = f"{URL_BASE}/{endpoint}/{station_id}?api-key={api_key}"
+
+        try:
+            response = requests.get(url, headers=headers)
+            if response.status_code == 200:
+                print("Successful request")
+                json_response = response.json()
+                df_sensors = pd.DataFrame(json_response["sensors"])
+
+                df_data = pd.DataFrame()
+                for data in df_sensors["data"]:
+                    df_sensor = pd.DataFrame(data)
+                    df_data = pd.concat([df_data, df_sensor], axis = 1)
+
+                # df_data = df_data[cols]
+                print(f"Retrieved current data from {station_name}")
+                return df_data
+            else:
+                print(response.status_code)
+                print(response.reason)
+                return None
+            
+        except Exception:
+            print("Could not retrieve information")
+            return None
 
 
 def _datetime_str_to_unix(datetime_str):
@@ -180,6 +244,20 @@ def get_historic_data(station_name,
 
 def _filter_cols_current_data(df_data):
     df_data = df_data.loc[:,~df_data.columns.duplicated(keep = "last")].copy()
+
+    router_ip = _check_router_ip()
+    if router_ip == '192.168.1.1':
+        for col in df_data.columns:
+            if col.startswith('rain'):
+                col_new = col + '_mm'
+                df_data.rename(columns={col: col_new}, inplace=True)
+
+        # hardcode column names when requesting data from the router
+        df_data.rename(columns={"rain_size_mm": "rain_size",
+                                "rain_storm_last_end_at_mm": "rain_storm_last_end_at",
+                                "rain_storm_last_start_at_mm": "rain_storm_last_start_at"}, inplace=True)
+        df_data["rain_storm_start_time"] = None
+
     df_data = df_data[cols]
 
     return df_data
@@ -226,6 +304,7 @@ def _mph_to_kmh(speed_mph):
 
 
 def parse_current_data(df_data):
+
     df_data = _filter_cols_current_data(df_data)
     df_data = _unix_to_datetime(df_data)
 

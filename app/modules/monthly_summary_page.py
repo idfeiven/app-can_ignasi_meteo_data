@@ -175,6 +175,13 @@ def get_df_month_summary(data_month):
 
 # -------------------------------------MAIN PROGRAM-----------------------------------
 
+st.set_page_config( 
+    page_title="Resumen mensual",
+    page_icon=":bar_chart:",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
 year_actual, month_actual= get_current_year_month()
 months = get_months_dict()
 

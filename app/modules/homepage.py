@@ -10,6 +10,13 @@ def get_map_data():
     return map_data
 
 
+st.set_page_config(
+    page_title="Sencelles (Ca'n Ignasi) - Estación meteorológica",
+    page_icon="🌤️",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
 # Título de la aplicación
 st.title("Sencelles (Ca'n Ignasi) - Estación meteorológica")
 
