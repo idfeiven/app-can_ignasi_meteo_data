@@ -366,7 +366,7 @@ def download_data(station_name, start_datetime, end_datetime, historic = False):
                                 api_key,
                                 api_secret)
 
-        if df_data.empty:
+        if type(df_data) == None:
             print("No data to parse!")
             return None
         else:    
